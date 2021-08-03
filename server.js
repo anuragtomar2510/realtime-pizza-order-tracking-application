@@ -16,6 +16,9 @@ app.get('/', (req, res) => {
 
 });
 
+// assign
+
+app.use(express.static('public'));
 
 // set Template Engine 
 app.use(expressLayout);
