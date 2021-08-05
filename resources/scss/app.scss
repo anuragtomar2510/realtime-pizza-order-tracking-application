@@ -1,4 +1,6 @@
 @import './variables';
+@import "~noty/src/noty.scss";
+@import "~noty/src/themes/mint.scss";
 
 body {
 
@@ -55,6 +57,12 @@ section.hero {
                 color: $pure;
 
         }
+
+        &:focus {
+
+                outline : none;
+
+        }
 }
 
 .btn-primary {
@@ -94,4 +102,12 @@ section.cart {
                         
                 }
         }
+}
+
+
+.noty_theme__mint {
+
+        border-radius: 50px !important;
+        padding-left: 8px !important;
+
 }
