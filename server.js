@@ -9,6 +9,7 @@ const DB_URL = `mongodb://localhost:27017/pizza`;
 const session = require('express-session');
 const flash = require('express-flash');
 const MongoDbStore = require('connect-mongo');
+const passport = require('passport');
 
 const app = express();
 
@@ -49,14 +50,31 @@ app.use(session({
         cookie : {maxAge : 100 * 60 * 60 * 24}
 
 }));
+
+
+// Passport Config 
+
+const passportInit = require('./app/http/config/passport');
+passportInit(passport);
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 app.use(flash());
+
+
+
+
 app.use(express.static('public'));
 
+app.use(express.urlencoded({extended : false}));
 app.use(express.json());
 app.use((req, res, next) => {
 
         res.locals.session = req.session;
-        next(); 
+        res.locals.user = req.user;
+        next();
+      
 });
 
 // set Template Engine 
