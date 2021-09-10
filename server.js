@@ -5,17 +5,17 @@ const expressLayout = require('express-ejs-layouts');
 const path = require('path');
 const mongoose = require('mongoose');
 const PORT = process.env.PORT || 3300;
-const DB_URL = `mongodb://localhost:27017/pizza`;
+const DB_URL = process.env.MONGO_URL;
 const session = require('express-session');
 const flash = require('express-flash');
 const MongoDbStore = require('connect-mongo');
 const passport = require('passport');
+const Emitter = require('events');
 
 const app = express();
 
 
-// Database connection
-
+// Database connection  
 mongoose.connect(DB_URL, {
 
         useNewUrlParser : true,
@@ -38,6 +38,9 @@ const mongoStore =  new MongoDbStore({
 
 });
 
+// Event emitter
+const eventEmitter = new Emitter()
+app.set('eventEmitter', eventEmitter)
 
 
 // assign
@@ -84,11 +87,41 @@ app.set('view engine', 'ejs');
 
 
 require('./routes/web')(app);
+app.use((req, res) => {
 
+        res.status(404).send('<h1>404, Page Not Found :(</h1>')
+})
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
 
         console.log(`Server started & tuned at port ${PORT}`);
 
 
 });
+
+
+// Socket
+const io = require('socket.io')(server);
+io.on('connection', (socket) => {
+
+        socket.on('join', (orderId) => {
+
+                socket.join(orderId)
+
+        })
+})
+
+
+eventEmitter.on('orderUpdated', (data) => {
+
+        
+        io.to(`order_${data._id}`).emit('orderUpdated', data);
+        
+})
+
+eventEmitter.on('orderPlaced', (data) => {
+
+       console.log(data)
+        io.to('adminRoom').emit('orderPlaced', data)
+        
+})
